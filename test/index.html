@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Test</title>
+  <style>
+    .tip{
+      display: none;
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <div id="tip1" class="tip">过期时间只能挑选一个进行。</div>
+  <div id="tip2" class="tip">设置成功。</div>
+  <div id="tip3" class="tip">请检查值是否漏填了。</div>
+  <div id="c1">
+    <label for="input1">设置 name  ：</label>
+    <input type="text" id="input1" placeholder="">
+  </div>
+  <div id="c2">
+    <label for="input2">设置 value ：</label>
+    <input type="text" id="input2" placeholder="">
+  </div>
+  <div id="c3">
+    <label for="input3">设置过期时间（多少天以后） ：</label>
+    <input type="text" id="input3" placeholder="">
+  </div>
+  <div id="c4">
+    <label for="input3">设置过期时间（多少秒以后） ：</label>
+    <input type="text" id="input4" placeholder="">
+  </div>
+  <div id="c5">
+    <button type="button" id="input5">进行设置</button>
+  </div>
+  <script src="../util.js"></script>
+  <script>
+    var $name = document.getElementById("input1"),
+    $value = document.getElementById("input2"),
+    $day = document.getElementById("input3"),
+    $second = document.getElementById("input4"),
+    $button = document.getElementById("input5"),
+    $tip1 = document.getElementById("tip1"),
+    $tip2 = document.getElementById("tip2");
+    $tip3 = document.getElementById("tip3");
+
+    $button.addEventListener('click', function(){
+      console.log('click');
+      var name = $day.value;
+      var day = $day.value;
+      var second = $second.value;
+
+      if( $day !== "" && $second !== "" ){
+
+      }
+      browserStorage.storage();
+    }) 
+
+  </script>
+</body>
+</html>
