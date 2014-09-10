@@ -38,18 +38,22 @@
   </div>
   <script src="../src/util.js"></script>
   <script>
+    "use strict";
+    var empty = function() {}
+    window.console = window.console || {};
+    console.log = console.log || empty;
+    console.table = console.table || empty;
     var addEventListenerStr;
     var addEventListenerPrefix = "";
     (function() {
       // 初始化时间动作的处理
-      if( window.addEventListener ){
+      if( typeof window.addEventListener === "function" ) {
         addEventListenerStr = "addEventListener";
       } else {
         addEventListenerStr = "attachEvent";
         addEventListenerPrefix = "on";
       }
     })();
-    console.log(addEventListenerStr);
     var $name = document.getElementById("input1"),
     $value = document.getElementById("input2"),
     $day = document.getElementById("input3"),
@@ -59,16 +63,16 @@
     // 过期时间只能挑选一个进行。
     $tip1 = document.getElementById("tip1"),
     // 设置成功。
-    $tip2 = document.getElementById("tip2");
+    $tip2 = document.getElementById("tip2"),
     // 请检查值是否漏填了。
-    $tip3 = document.getElementById("tip3");
+    $tip3 = document.getElementById("tip3"),
     // 设置成功
-    $tip4 = document.getElementById("tip4");
+    $tip4 = document.getElementById("tip4"),
     // 用来做提示的。
     $tip5 = document.getElementById("tip5");
 
     $button[addEventListenerStr](addEventListenerPrefix+'click', function(){
-      // console.log('click');
+      // console.log('$button click');
       var name = $name.value;
       var value = $value.value;
       var day = $day.value;
@@ -92,20 +96,20 @@
         
         obj = {};
         if( day === "" ){
-          // console.log( "browserStorage.storageSecond", "name", name, "value", value, "second", second);
+          console.log( "browserStorage.storageSecond", "name", name, "value", value, "second", second);
           browserStorage.storageSecond(name, value, second);
         } else if( second === "" ){
-          // console.log( "browserStorage.storage", "name", name, "value", value, "day", day);
+          console.log( "browserStorage.storage", "name", name, "value", value, "day", day);
           browserStorage.storage(name, value, day);
-        } 
-
+        }
       } else {
-        // console.log( "browserStorage.storage session", "name", name, "value", value);
+        console.log( "browserStorage.storage session", "name", name, "value", value);
         browserStorage.storage(name, value);
       }
     });
 
     $button2[addEventListenerStr](addEventListenerPrefix+'click', function(){
+      // console.log('$button2 click');
       var name = $name.value;
       browserStorage.remove(name);
     });
@@ -117,16 +121,53 @@
       if(!e) {
         e = window.event;
       }
-      console.log(e);
-      var sessionStorageObj = [], localStorageObj = [], length, name;
+      // console.log(e);
+      var storageObjArr = [], localStorageObj = [], length, name, value, obj;
       for( length = sessionStorage.length; length--; ){
-        name =  sessionStorage.key(length)
-        console.log( length, name, sessionStorage.getItem(name));
+        name =  sessionStorage.key(length);
+        value = sessionStorage.getItem(name);
+        // console.log( length, name, value);
+        obj = {
+          name: name,
+          value: value,
+          index: length,
+          type: "sessionStorage"
+
+        };
+        storageObjArr.push(obj);
+      }
+
+      for( length = localStorage.length; length--; ){
+        name =  localStorage.key(length);
+        value = localStorage.getItem(name);
+        // console.log( length, name, value);
+        obj = {
+          name: name,
+          value: value,
+          index: length,
+          type: "localStorage"
+
+        };
+        storageObjArr.push(obj);
+      }
+      if(storageObjArr.length > 0){
+        // console.log("storage list=====begin");
+        console.log("Now is:", (new Date()).toString(), ".  List the storage data:");
+        console.table(storageObjArr);
+        // console.log("storage list=======end");
       }
     }
 
+
+
     (function() {
-      window[addEventListenerStr]( addEventListenerPrefix + "storage", storageHandler,false);
+      // the storage event just see http://www.whatwg.org/specs/web-apps/current-work/#the-storage-event
+      // 浏览器自动触发的
+      window[addEventListenerStr]( addEventListenerPrefix + "storage", function(e) {
+        storageHandler(e);
+      },false);
+      // 浏览器不自动触发的时候，自动触发
+      window[addEventListenerStr]( addEventListenerPrefix + "storage-passive", storageHandler,false);
     })();
 
   </script>
