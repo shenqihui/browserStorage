@@ -71,7 +71,7 @@ browserStorage = {
 ```javascript
 /**
  * @desc 进行信息的存储。以天为跳转单位。 存储进 html5 的stronge。
- * memberof browserStorage
+ * @memberof browserStorage
  * @param { string } name 字段的名字
  * @param { string } value 字段的值
  * @param { int } 字段的有效时间，多少天。
@@ -88,7 +88,7 @@ browserStorage = {
 ```javascript
 /**
  * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。
- * memberof browserStorage
+ * @memberof browserStorage
  * @param { string } name 字段的名字
  * @param { string } value 字段的值
  * @param { int } 字段的有效时间，多少天。

@@ -38,7 +38,7 @@
      * @name fireEvent
      * @desc 进行事件的触发。浏览器貌似不进行直接触发的。。。
      * @depend []
-     * memberof browserStorage
+     * @memberof browserStorage
      * @param { string } name 字段的名字
      * @param { string } oldValue 设置之前字段值
      * @param { string } newValue 设置之后字段值
@@ -91,7 +91,7 @@
      * @name storage
      * @desc 进行信息的存储。以天为跳转单位。 存储进 html5 的stronge。
      * @depend []
-     * memberof browserStorage
+     * @memberof browserStorage
      * @param { string } name 字段的名字
      * @param { string } value 字段的值
      * @param { int } 字段的有效时间，多少天。
@@ -134,7 +134,7 @@
      * @name storageSecond
      * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。
      * @depend []
-     * memberof browserStorage
+     * @memberof browserStorage
      * @param { string } name 字段的名字
      * @param { string } value 字段的值
      * @param { string } expires 字段的有效时间，多少秒。
@@ -178,7 +178,7 @@
      * @name read
      * @desc 像 cookies 一样进行进行信息的读取。特别注意过期时间。
      * @depend []
-     * memberof browserStorage
+     * @memberof browserStorage
      * @param { name } 字段的名字
      **/
     read = function(name) {
@@ -235,7 +235,7 @@
      * @name remove
      * @desc 删除该字段。
      * @depend []
-     * memberof browserStorage
+     * @memberof browserStorage
      * @param { name } 字段的名字
      **/
     remove = function(name) {
