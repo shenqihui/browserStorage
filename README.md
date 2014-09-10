@@ -102,7 +102,18 @@ test 文件夹下面有个 index.html 下面，打开它，打开 console ， �
 
 
 ##授权协议
-Released under the MIT, BSD, and GPL Licenses
+
+Released under the [WTFPL][1] Licenses
+就是没啥授权，想怎么改就怎么改，改的好改的坏什么的，也 pull request 过来瞧瞧。是驴子是马，溜溜就知道。
 
 ==========
 © shenqihui
+
+
+
+
+
+
+
+==========
+  [1]: http://www.wtfpl.net/txt/copying/
