@@ -14,47 +14,120 @@
   <div id="tip1" class="tip">过期时间只能挑选一个进行。</div>
   <div id="tip2" class="tip">设置成功。</div>
   <div id="tip3" class="tip">请检查值是否漏填了。</div>
+  <div id="tip4" class="tip">设置成功。</div>
+  <div id="tip5" class="tip"></div>
   <div id="c1">
     <label for="input1">设置 name  ：</label>
-    <input type="text" id="input1" placeholder="">
+    <input type="text" id="input1" placeholder="" value="n1">
   </div>
   <div id="c2">
     <label for="input2">设置 value ：</label>
-    <input type="text" id="input2" placeholder="">
+    <input type="text" id="input2" placeholder="" value="v1">
   </div>
   <div id="c3">
     <label for="input3">设置过期时间（多少天以后） ：</label>
-    <input type="text" id="input3" placeholder="">
+    <input type="text" id="input3" placeholder="" value="1">
   </div>
   <div id="c4">
     <label for="input3">设置过期时间（多少秒以后） ：</label>
     <input type="text" id="input4" placeholder="">
   </div>
   <div id="c5">
-    <button type="button" id="input5">进行设置</button>
+    <button type="button" id="b1">进行设置</button>
+    <button type="button" id="b2">删除</button>
   </div>
-  <script src="../util.js"></script>
+  <script src="../src/util.js"></script>
   <script>
+    var addEventListenerStr;
+    var addEventListenerPrefix = "";
+    (function() {
+      // 初始化时间动作的处理
+      if( window.addEventListener ){
+        addEventListenerStr = "addEventListener";
+      } else {
+        addEventListenerStr = "attachEvent";
+        addEventListenerPrefix = "on";
+      }
+    })();
+    console.log(addEventListenerStr);
     var $name = document.getElementById("input1"),
     $value = document.getElementById("input2"),
     $day = document.getElementById("input3"),
     $second = document.getElementById("input4"),
-    $button = document.getElementById("input5"),
+    $button = document.getElementById("b1"),
+    $button2 = document.getElementById("b2"),
+    // 过期时间只能挑选一个进行。
     $tip1 = document.getElementById("tip1"),
+    // 设置成功。
     $tip2 = document.getElementById("tip2");
+    // 请检查值是否漏填了。
     $tip3 = document.getElementById("tip3");
+    // 设置成功
+    $tip4 = document.getElementById("tip4");
+    // 用来做提示的。
+    $tip5 = document.getElementById("tip5");
 
-    $button.addEventListener('click', function(){
-      console.log('click');
-      var name = $day.value;
+    $button[addEventListenerStr](addEventListenerPrefix+'click', function(){
+      // console.log('click');
+      var name = $name.value;
+      var value = $value.value;
       var day = $day.value;
       var second = $second.value;
+      var obj = {};
 
-      if( $day !== "" && $second !== "" ){
+      // console.log( "name", name, "value", value, "day", day, "second", second);
+      if( day !== "" && second !== "" ){
+        console.log("过期时间只能挑选一个进行。");
+        $tip1.style.display = "block";
+        $tip2.style.display = "none";
+        $tip3.style.display = "none";
+        $tip4.style.display = "none";
+        $tip5.style.display = "none";
+      } else if( !( day === "" && second === "" ) ) {
+        $tip1.style.display = "none";
+        $tip2.style.display = "none";
+        $tip3.style.display = "none";
+        $tip4.style.display = "none";
+        $tip5.style.display = "none";
+        
+        obj = {};
+        if( day === "" ){
+          // console.log( "browserStorage.storageSecond", "name", name, "value", value, "second", second);
+          browserStorage.storageSecond(name, value, second);
+        } else if( second === "" ){
+          // console.log( "browserStorage.storage", "name", name, "value", value, "day", day);
+          browserStorage.storage(name, value, day);
+        } 
 
+      } else {
+        // console.log( "browserStorage.storage session", "name", name, "value", value);
+        browserStorage.storage(name, value);
       }
-      browserStorage.storage();
-    }) 
+    });
+
+    $button2[addEventListenerStr](addEventListenerPrefix+'click', function(){
+      var name = $name.value;
+      browserStorage.remove(name);
+    });
+    
+
+  
+
+    function storageHandler(e) {
+      if(!e) {
+        e = window.event;
+      }
+      console.log(e);
+      var sessionStorageObj = [], localStorageObj = [], length, name;
+      for( length = sessionStorage.length; length--; ){
+        name =  sessionStorage.key(length)
+        console.log( length, name, sessionStorage.getItem(name));
+      }
+    }
+
+    (function() {
+      window[addEventListenerStr]( addEventListenerPrefix + "storage", storageHandler,false);
+    })();
 
   </script>
 </body>
