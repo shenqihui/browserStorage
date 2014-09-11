@@ -21,11 +21,14 @@ GET IT AND ENJOY IT.
 #不足之处
 
 会占用一个命名空间，放在 `window.browserStorage` 下面，要是这个空间已经被占用，将警告下，就没进行其他动作了。开发者在调试的时候应该注意这个，要是出现一个经过，看看里面的英文，就清楚是为什么了。  
+加载完毕 js 之后，一般情况下，会占用 `window.browserStorage` 和 `window.browserStorageForceUseCookie` 空间。
+
 
 #空间属性
 
 ```javascript
-browserStorage = {
+window.browserStorageForceUseCookie = false;
+window.browserStorage = {
   date: new Date(),
   read: function() { "....." },
   fireEvent: function() { "....." },
@@ -42,6 +45,13 @@ browserStorage = {
 <script src="src/util.js"></script>
 ```
 然后，就用下面的方法进行操作了。
+
+## 选择使用 html5 storage 或者 cookie
+
+默认将使用 html5 storage , 不支持 html5 storage 的时候才转移到 cookie 存储，要是想主动转移使用 cookie ，需要再引入 js 文件之前，设置如下代码：
+```javascript
+window.browserStorageForceUseCookie = true
+```
 
 ## browserStorage.date
 
@@ -65,9 +75,27 @@ browserStorage = {
 强力移除 storage 的函数，不管是通过什么方式存储进去的。  
 
 
+
+
+
+## browserStorage.storageSecond(name, value, expires)
+
+```javascript
+/**
+ * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。多少秒之后过期。
+ * @memberof browserStorage
+ * @param { string } name 字段的名字
+ * @param { string } value 字段的值
+ * @param { int } 字段的有效时间，多少秒。
+          为 空，则直接存储为 session 方式。
+          为 数值 n ，则 n 秒之后过期。
+          为 数值 0 ，则永久保存，直到手动删除。
+ **/
+``` 
+
 ## browserStorage.storage(name, value, expires)
 
-进行信息的存储。以天为跳转单位。 存储进 html5 的 stronge。
+进行信息的存储。以天为跳转单位。 存储进 html5 的 stronge。  
 ```javascript
 /**
  * @desc 进行信息的存储。以天为跳转单位。 存储进 html5 的stronge。
@@ -80,22 +108,9 @@ browserStorage = {
           为 数值 0 ，则永久保存，直到手动删除。
  **/
 ```  
-
-
-
-## browserStorage.storageSecond(name, value, expires)
-
+这个接口是在 browserStorage.storageSecond 的基础上衍生出来直接设置多少天之后过期的。 程序内部实现直接等于一个适配器。把天数转换为秒数。
 ```javascript
-/**
- * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。
- * @memberof browserStorage
- * @param { string } name 字段的名字
- * @param { string } value 字段的值
- * @param { int } 字段的有效时间，多少天。
-          为 空，则直接存储为 session 方式。
-          为 数值 n ，则 n 天之后过期。
-          为 数值 0 ，则永久保存，直到手动删除。
- **/
+storageSecond(name, value, expires * 24 * 60 * 60);
 ``` 
 
 #测试
@@ -107,7 +122,10 @@ test 文件夹下面有个 index.html 下面。
 #版本
 
 ## 当前版本 
-0.1.0-pre
+0.1.1
+
+## 0.1.1
+修复 0.1.0-pre 版本的 cookies 大 bug 。正式发布 0.1 版本。经过测试， firefox\chrome\IE11 可用。
 
 ## 0.1.0-pre
 初步发布能用的版本，还没经过多种浏览器的使用。

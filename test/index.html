@@ -35,14 +35,15 @@
   <div id="c5">
     <button type="button" id="b1">进行设置</button>
     <button type="button" id="b2">删除</button>
+    <button type="button" id="b3">读取</button>
   </div>
   <script src="../src/util.js"></script>
   <script>
     "use strict";
-    var empty = function() {}
+    var noop = function() {}
     window.console = window.console || {};
-    console.log = console.log || empty;
-    console.table = console.table || empty;
+    console.log = console.log || noop;
+    console.table = console.table || console.log || noop;
     var addEventListenerStr;
     var addEventListenerPrefix = "";
     (function() {
@@ -60,6 +61,7 @@
     $second = document.getElementById("input4"),
     $button = document.getElementById("b1"),
     $button2 = document.getElementById("b2"),
+    $button3 = document.getElementById("b3"),
     // 过期时间只能挑选一个进行。
     $tip1 = document.getElementById("tip1"),
     // 设置成功。
@@ -113,6 +115,11 @@
       var name = $name.value;
       browserStorage.remove(name);
     });
+    $button3[addEventListenerStr](addEventListenerPrefix+'click', function(){
+      // console.log('$button2 click');
+      var name = $name.value;
+      console.log("读取", name, "为：", browserStorage.read(name));
+    });
     
 
   
@@ -123,6 +130,7 @@
       }
       // console.log(e);
       var storageObjArr = [], localStorageObj = [], length, name, value, obj;
+      console.log("sessionStorage.length", sessionStorage.length, "localStorage.length", localStorage.length);
       for( length = sessionStorage.length; length--; ){
         name =  sessionStorage.key(length);
         value = sessionStorage.getItem(name);
@@ -139,6 +147,7 @@
 
       for( length = localStorage.length; length--; ){
         name =  localStorage.key(length);
+        ( /^\d+$/.test(name) === true ) && ( name = parseInt(name, 10) ) ;
         value = localStorage.getItem(name);
         // console.log( length, name, value);
         obj = {
@@ -169,7 +178,6 @@
       // 浏览器不自动触发的时候，自动触发
       window[addEventListenerStr]( addEventListenerPrefix + "storage-passive", storageHandler,false);
     })();
-
   </script>
 </body>
 </html>

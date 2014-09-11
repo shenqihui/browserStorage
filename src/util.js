@@ -5,32 +5,34 @@
    */
   "use strict";
   // 用于监控是否能触发本页面的 storageEvent 。
-  var addEventListenerStr;
-  var addEventListenerStrTestKey = "browserStorageStorageEventSupportTest" + ( new Date()).getTime();
-  var eventListenerPrefix = "";
-  var removeEventListenerStr;
+  var addEventListenerStr,
+    eventListenerPrefix = "",
+    removeEventListenerStr,
+    browserStorage = browserStorage || {},
+    fireEvent,
+    storage,
+    storageSecond,
+    read,
+    remove;
+  // 初始化选择动作的处理
+  if (typeof window.addEventListener === "function") {
+    addEventListenerStr = "addEventListener";
+    removeEventListenerStr = "removeEventListener"
+  } else {
+    addEventListenerStr = "attachEvent";
+    removeEventListenerStr = "detachEvent";
+    eventListenerPrefix = "on";
+  }
+  window.browserStorageForceUseCookie = window.browserStorageForceUseCookie || false;
 
 
-
-  (function() {
-    // 初始化时间动作的处理
-    if( typeof window.addEventListener === "function" ) {
-      addEventListenerStr = "addEventListener";
-      removeEventListenerStr = "removeEventListener"
-    } else {
-      addEventListenerStr = "attachEvent";
-      removeEventListenerStr = "detachEvent";
-      eventListenerPrefix = "on";
-    }
-  })();
-
-
-  var browserStorage = browserStorage || {};
-  browserStorage.supportLocalStorage = (typeof window.localStorage !== "undefined");
+  browserStorage.supportLocalStorage = typeof window.localStorage !== "undefined";
+  // 要是设置为false，就直接设置到 cookies 中
+  window.browserStorageForceUseCookie === true && browserStorage.supportLocalStorage = false;
+  // browserStorage.supportLocalStorage = false;
 
   // 存储时间，一切读取数据时候都以这个为过期时间为准。
   browserStorage.date = new Date();
-  var fireEvent, storage, storageSecond, read, remove;
 
   // 自动切换到 localStorage 中
   if (browserStorage.supportLocalStorage) {
@@ -46,42 +48,40 @@
      * @param { Storage } storage 一般为 localStorage 这个域，没啥用的参数
      **/
     fireEvent = (function() {
-
-      var shouldFire, empty; 
+      var shouldFire;
       shouldFire = function(name, oldValue, newValue, url, storage) {
+        var storageEvent;
+        // extend , 判断是否和 undefined 相等，不适用 || 主要是因为可能为 int 0 的情况。
+        name = name === undefined ? "" : name;
+        oldValue = oldValue === undefined ? "" : oldValue;
+        newValue = newValue === undefined ? "" : newValue;
+        url = url === undefined ? "" : location.href;
+        storage = storage === undefined ? {} : storage;
 
-        // extend 
-        name = (name === undefined? "" : name );
-        oldValue = (oldValue === undefined? "" : oldValue );
-        newValue = (newValue === undefined? "" : newValue );
-        url = (url === undefined? "" : location.href );
-        storage = (storage === undefined? "" : storage );
-
-        // trigger the s
-        var se = document.createEvent("StorageEvent");
-        se.initStorageEvent('storage-passive', false, false, name, oldValue, newValue, url, storage);
-        ;( typeof window.dispatchEvent !== "undefined" ) && ( window.dispatchEvent(se) );
+        // trigger the event
+        storageEvent = document.createEvent("StorageEvent");
+        storageEvent.initStorageEvent('storage-passive', false, false, name, oldValue, newValue, url, storage);
+        (typeof window.dispatchEvent !== "undefined") && (window.dispatchEvent(storageEvent));
       }
-      empty = function() {};
 
       return shouldFire;
     })();
     browserStorage.fireEvent = fireEvent;
 
-    ;(function() {
-      var storageHandlerForTestEventSupport;
+    !(function() {
+      var storageHandlerForTestEventSupport,
+        addEventListenerStrTestKey = "browserStorageStorageEventSupportTest" + (new Date()).getTime();
       storageHandlerForTestEventSupport = function(e) {
-        var empty;
-        empty = function() {};
-        // 需要是被是否当前自己页面触发的
+        // 需要是当前自己页面触发的
         // console.log("storageHandlerForTestEventSupport", e.key, addEventListenerStrTestKey);
-        if( e.key === addEventListenerStrTestKey) {
+        if (e.key === addEventListenerStrTestKey) {
           browserStorage.fireEvent = function() {};
         }
-        window[removeEventListenerStr]( eventListenerPrefix + "storage", storageHandlerForTestEventSupport, false);
-        storageHandlerForTestEventSupport = function(){};
+        window[removeEventListenerStr](eventListenerPrefix + "storage", storageHandlerForTestEventSupport, false);
+        storageHandlerForTestEventSupport = null;
+        addEventListenerStrTestKey = null;
       }
-      window[addEventListenerStr]( eventListenerPrefix + "storage", storageHandlerForTestEventSupport, false);
+      window[addEventListenerStr](eventListenerPrefix + "storage", storageHandlerForTestEventSupport, false);
       sessionStorage.setItem(addEventListenerStrTestKey, "1");
       sessionStorage.removeItem(addEventListenerStrTestKey);
     })();
@@ -100,34 +100,7 @@
               为 数值 0 ，则永久保存，直到手动删除。
      **/
     storage = function(name, value, expires) {
-      var exdate = new Date();
-      var storageObj = {};
-      if(typeof expires !== "number"){
-        try {
-          expires = parseInt( expires, 10)
-        } catch (e) {
-          expires = "";
-        } finally {
-          expires === expires ? expires = expires : expires = "" ;
-        }
-      }
-      if (expires === 0 || expires === "0") {
-        // 存储为永久字段到 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为  {"to":"forever","val":"i am value"}
-        storageObj.to = "forever";
-        storageObj.val = value;
-        localStorage.setItem(name, JSON.stringify(storageObj));
-      } else if (typeof expires === "number") {
-        // 存储为一定时间过期的 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为 {"to": "到期时间", "val": "值"}
-        exdate.setDate(exdate.getDate() + expires);
-        storageObj.to = exdate.toString();
-        storageObj.val = value;
-        localStorage.setItem(name, JSON.stringify(storageObj));
-      } else {
-        // 直接存储为 sessionStorage;
-        sessionStorage.setItem(name, value);
-      }
-
-      browserStorage.fireEvent();
+      storageSecond(name, value, expires * 24 * 60 * 60);
     }
     browserStorage.storage = storage;
     /**
@@ -143,19 +116,19 @@
               为 数值 0 ，则永久保存，直到手动删除。
      **/
     storageSecond = function(name, value, expires) {
-
       var exdate = new Date();
       var storageObj = {};
-      if(typeof expires !== "number"){
+      if (typeof expires !== "number") {
         try {
-          expires = parseInt( expires, 10);
-        } catch (e) {
-          expires = "";
-        } finally {
-          expires === expires ? expires = expires : expires = "" ;
+          expires = parseInt(expires, 10)
+        } catch (e) {} finally {
+          // 避免 NaN 的情况
+          expires = expires === expires ? expires : "";
         }
       }
-      if (expires === 0 || expires === "0") {
+
+
+      if (expires == 0) {
         // 存储为永久字段到 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为  {"to":"forever","val":"i am value"}
         storageObj.to = "forever";
         storageObj.val = value;
@@ -206,14 +179,14 @@
             };
           }
           localStorageDataObj.val = localStorageDataObj.val || "";
-          if( localStorageDataObj.to === "forever") {
+          if (localStorageDataObj.to === "forever") {
             // 存储为永久数据的时候，不需要判断时间，直接返回数据
             return localStorageDataObj.val;
           } else {
             // 进行时间比较
             try {
               localStorageDataObj.to = new Date(localStorageDataObj.to);
-            } catch (e) {
+            } catch (e) {} finally {
               localStorageDataObj.to = localStorageDataObj.to || browserStorage.date;
             }
             if (browserStorage.date > localStorageDataObj.to) {
@@ -247,65 +220,60 @@
   } else {
     // 直接存储到 cookies 中，这个有部分bug，不用管了。
     // 以下是使用 cookies 进行存储的
-    storage = function(name, value, expires, path, domain, HttpOnly) {
-      var today = new Date();
-      today.setTime(today.getTime());
-      if (expires) {
-        expires = expires * 1000 * 60 * 60 * 24;
-      }
-      var expires_date = new Date(today.getTime() + (expires));
-
-      document.cookie = name + "=" + escape(value) +
-        ((expires) ? ";expires=" + expires_date.toGMTString() : "") +
-        ((path) ? ";path=" + path : "") +
-        ((domain) ? ";domain=" + domain : "") +
-        ((secure) ? ";secure" : "") +
-        ((HttpOnly) ? ";HttpOnly" : "");
+    storage = function(name, value, expires) {
+      storageSecond(name, value, expires * 60 * 60 * 24);
     }
-    browserStorage.storage = storage
-    storageSecond = function(name, value, expires, path, domain, HttpOnly) {
-      var today = new Date();
-      today.setTime(today.getTime());
-      if (expires) {
-        expires = expires * 1000;
+    browserStorage.storage = storage;
+    storageSecond = function(name, value, expires) {
+      var exdate = new Date();
+      if (typeof expires !== "number") {
+        try {
+          expires = parseInt(expires, 10);
+        } catch (e) {} finally {
+          // 避免 NaN 的情况
+          expires = expires === expires ? expires : "";
+        }
       }
-      var expires_date = new Date(today.getTime() + (expires));
-
-      document.cookie = name + "=" + escape(value) +
-        ((expires) ? ";expires=" + expires_date.toGMTString() : "") +
-        ((path) ? ";path=" + path : "") +
-        ((domain) ? ";domain=" + domain : "") +
-        ((secure) ? ";secure" : "") +
-        ((HttpOnly) ? ";HttpOnly" : "");
+      exdate.setSeconds(exdate.getSeconds() + expires);
+      var cookiesArr = [];
+      cookiesArr.push(name);
+      cookiesArr.push("=");
+      cookiesArr.push(escape(value));
+      if (expires !== undefined) {
+        cookiesArr.push(";expires=");
+        cookiesArr.push(exdate.toGMTString());
+      }
+      document.cookie = cookiesArr.join("");
     }
     browserStorage.storageSecond = storageSecond;
     read = function(name) {
-      var start, end;
-      if (document.cookie.length > 0) {
-        start = document.cookie.indexOf(name + "=")
-        if (start != -1) {
-          // 这里有个bug，需要进行边界处理
-          start = start + name.length + 1
-          end = document.cookie.indexOf(";", start)
-          if (end == -1) end = document.cookie.length
-          return unescape(document.cookie.substring(start, end))
-        }
-      }
-      return ""
+      var match = null;
+      var regex = new RegExp("[;]\\s*" + name + "=([^;]+)[\\s;]*?");
+      // console.log(regex);
+      var cookie = "; " + document.cookie;
+      match = cookie.match(regex);
+      if (match !== null) {
+        return unescape(match[1]);
+      } else {
+        return ""
+      };
     }
     browserStorage.read = read;
     remove = function(name, path, domain) {
-      if (Get_Cookie(name)) {
-        document.cookie = name + "=" +
-          ((path) ? ";path=" + path : "") +
-          ((domain) ? ";domain=" + domain : "") +
-          ";expires=Thu, 01-Jan-1970 00:00:01 GMT";
+      var cookiesArr = [];
+      // console.log( read(name));
+      if (read(name)) {
+        cookiesArr.push(name);
+        cookiesArr.push("=");
+        cookiesArr.push(";expires=Thu, 01-Jan-1970 00:00:01 GMT");
+        // console.log(cookiesArr.join(""));
+        document.cookie = cookiesArr.join("");
       }
     }
     browserStorage.remove = remove;
   }
   // browserStorage不进行冲突处理
-  if ( window.browserStorage !== undefined) {
+  if (window.browserStorage !== undefined) {
     console.warn("browserStorage: window.browserStorage is already used, browserStorage will not use this namespace. Make sure to release window.browserStorage before include browserStorage lib");
   } else {
     window.browserStorage = window.browserStorage || browserStorage;
