@@ -40,14 +40,7 @@ module.exports = function( grunt ) {
 		build: {
 			all: {
 				dest: "dist/browserStorage.js",
-				minimum: ["browserStorage.js"],
-				// Exclude specified modules if the module matching the key is removed
-				// removeWith: {
-				// 	ajax: [ ],
-				// 	callbacks: [ ],
-				// 	css: [ ],
-				// 	sizzle: [ ]
-				// }
+				minimum: ["browserStorage.js"]
 			}
 		},
 		bowercopy: {
@@ -59,12 +52,11 @@ module.exports = function( grunt ) {
 			},
 			tests: {
 				options: {
-					// destPrefix: "test/libs"
+					destPrefix: "test/libs"
 				},
 				files: {
-					// "qunit": "qunit/qunit",
-					// "require.js": "requirejs/require.js",
-					// "sinon/fake_timers.js": "sinon/lib/sinon/util/fake_timers.js"
+					"browserStorage.js": "dist/browserStorage.js",
+					"browserStorage.min.js": "dist/browserStorage.min.js",
 				}
 			}
 		},
@@ -97,7 +89,7 @@ module.exports = function( grunt ) {
 			gruntfile: "Gruntfile.js",
 
 			// Right know, check only test helpers
-			test: [ "test/data/testrunner.js", "test/data/testinit.js" ],
+			test: [ ],
 			tasks: "build/tasks/*.js"
 		},
 		testswarm: {
