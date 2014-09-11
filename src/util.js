@@ -28,7 +28,7 @@
 
   browserStorage.supportLocalStorage = typeof window.localStorage !== "undefined";
   // 要是设置为false，就直接设置到 cookies 中
-  window.browserStorageForceUseCookie === true && browserStorage.supportLocalStorage = false;
+  (window.browserStorageForceUseCookie === true) && (browserStorage.supportLocalStorage = false);
   // browserStorage.supportLocalStorage = false;
 
   // 存储时间，一切读取数据时候都以这个为过期时间为准。
@@ -100,7 +100,11 @@
               为 数值 0 ，则永久保存，直到手动删除。
      **/
     storage = function(name, value, expires) {
-      storageSecond(name, value, expires * 24 * 60 * 60);
+      if (expires === undefined) {
+        storageSecond(name, value);
+      } else {
+        storageSecond(name, value, expires * 24 * 60 * 60);
+      }
     }
     browserStorage.storage = storage;
     /**
@@ -116,32 +120,35 @@
               为 数值 0 ，则永久保存，直到手动删除。
      **/
     storageSecond = function(name, value, expires) {
-      var exdate = new Date();
-      var storageObj = {};
-      if (typeof expires !== "number") {
-        try {
-          expires = parseInt(expires, 10)
-        } catch (e) {} finally {
-          // 避免 NaN 的情况
-          expires = expires === expires ? expires : "";
-        }
-      }
+      var exdate = new Date(), storageObj = {};
 
-
-      if (expires == 0) {
-        // 存储为永久字段到 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为  {"to":"forever","val":"i am value"}
-        storageObj.to = "forever";
-        storageObj.val = value;
-        localStorage.setItem(name, JSON.stringify(storageObj));
-      } else if (typeof expires === "number") {
-        // 存储为一定时间过期的 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为 {"to": "到期时间", "val": "值"}
-        exdate.setSeconds(exdate.getSeconds() + expires);
-        storageObj.to = exdate.toString();
-        storageObj.val = value;
-        localStorage.setItem(name, JSON.stringify(storageObj));
-      } else {
+      if (expires === undefined) {
         // 直接存储为 sessionStorage;
         sessionStorage.setItem(name, value);
+      } else {
+        if (typeof expires !== "number") {
+          try {
+            expires = parseInt(expires, 10);
+          } catch (e) {} finally {
+            // 避免 NaN 的情况
+            expires = expires === expires ? expires : "";
+          }
+        }
+
+        if (expires === 0 || expires === "0") {
+          // 存储为永久字段到 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为  {"to":"forever","val":"i am value"}
+          storageObj.to = "forever";
+          storageObj.val = value;
+          localStorage.setItem(name, JSON.stringify(storageObj));
+        } else if (typeof expires === "number") {
+          // 存储为一定时间过期的 localStorage ， 存储方式为 key + value ， 其中 value 为 json 字符串，内容格式为 {"to": "到期时间", "val": "值"}
+          exdate.setSeconds(exdate.getSeconds() + expires);
+          storageObj.to = exdate.toString();
+          storageObj.val = value;
+          localStorage.setItem(name, JSON.stringify(storageObj));
+        } else {
+          // 都是 "" 的情况了
+        }
       }
 
       browserStorage.fireEvent();
@@ -221,27 +228,33 @@
     // 直接存储到 cookies 中，这个有部分bug，不用管了。
     // 以下是使用 cookies 进行存储的
     storage = function(name, value, expires) {
-      storageSecond(name, value, expires * 60 * 60 * 24);
+      if (expires === undefined) {
+        storageSecond(name, value);
+      } else {
+        storageSecond(name, value, expires * 24 * 60 * 60);
+      }
     }
     browserStorage.storage = storage;
     storageSecond = function(name, value, expires) {
       var exdate = new Date();
-      if (typeof expires !== "number") {
-        try {
-          expires = parseInt(expires, 10);
-        } catch (e) {} finally {
-          // 避免 NaN 的情况
-          expires = expires === expires ? expires : "";
-        }
-      }
-      exdate.setSeconds(exdate.getSeconds() + expires);
       var cookiesArr = [];
       cookiesArr.push(name);
       cookiesArr.push("=");
       cookiesArr.push(escape(value));
       if (expires !== undefined) {
+        if (typeof expires !== "number") {
+          try {
+            expires = parseInt(expires, 10);
+          } catch (e) {} finally {
+            // 避免 NaN 的情况
+            expires = expires === expires ? expires : "";
+          }
+        }
+        exdate.setSeconds(exdate.getSeconds() + expires);
         cookiesArr.push(";expires=");
         cookiesArr.push(exdate.toGMTString());
+      } else {
+        // session cookie
       }
       document.cookie = cookiesArr.join("");
     }
