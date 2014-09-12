@@ -42,17 +42,17 @@
 
 
   /**
-     * @name storage
-     * @desc 进行信息的存储。以天为跳转单位。 存储进 html5 的stronge。
-     * @depend []
-     * @memberof browserStorage
-     * @param { string } name 字段的名字
-     * @param { string } value 字段的值
-     * @param { int } 字段的有效时间，多少天。
-              为 空，则直接存储为 session 方式。
-              为 数值 n ，则 n 天之后过期。
-              为 数值 0 ，则永久保存，直到手动删除。
-     **/
+   * @name storage
+   * @desc 进行信息的存储。以天为跳转单位。 存储进 html5 的stronge。
+   * @depend []
+   * @memberof browserStorage
+   * @param { string } name 字段的名字
+   * @param { string } value 字段的值
+   * @param { int } 字段的有效时间，多少天。
+            为 空，则直接存储为 session 方式。
+            为 数值 n ，则 n 天之后过期。
+            为 数值 0 ，则永久保存，直到手动删除。
+   **/
   storage = function(name, value, expires) {
     if (expires === undefined) {
       storageSecond(name, value);
@@ -68,25 +68,25 @@
     }
   }
   /**
-     * @name storageSecond
-     * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。
-     * @depend []
-     * @memberof browserStorage
-     * @param { string } name 字段的名字
-     * @param { string } value 字段的值
-     * @param { string } expires 字段的有效时间，多少秒。
-              为 空，则直接存储为 session 方式。
-              为 数值 n ，则 n 天之后过期。
-              为 数值 0 ，则永久保存，直到手动删除。
-     **/
+   * @name storageSecond
+   * @desc 进行信息的存储。以秒为跳转单位。 存储进 html5 的stronge。
+   * @depend []
+   * @memberof browserStorage
+   * @param { string } name 字段的名字
+   * @param { string } value 字段的值
+   * @param { string } expires 字段的有效时间，多少秒。
+            为 空，则直接存储为 session 方式。
+            为 数值 n ，则 n 天之后过期。
+            为 数值 0 ，则永久保存，直到手动删除。
+   **/
   storageSecond = function(name, value, expires) {
     var exdate = new Date(),
       storageObj = {};
 
     if (expires === undefined) {
       // 直接存储为 sessionStorage;
-      sessionStorage.setItem(name, value);
-      // c_storageSecond(name, value);
+      // sessionStorage.setItem(name, value);
+      c_storageSecond(name, value);
     } else {
       if (typeof expires !== "number") {
         try {
@@ -139,7 +139,7 @@
     document.cookie = cookiesArr.join("");
   }
   // sessionStorage 是个二货 -_-|| , 只能存储进 cookies
-  sessionStorage.setItem = c_storageSecond;
+  // sessionStorage.setItem = c_storageSecond;
   /**
    * @name read
    * @desc 像 cookies 一样进行进行信息的读取。特别注意过期时间。
@@ -149,7 +149,7 @@
    **/
   read = function(name) {
     var cookieVal = c_read(name);
-    if( cookieVal !== "" ){
+    if (cookieVal !== "") {
       return cookieVal;
     } else {
       var sessionStorageData = sessionStorage.getItem(name);
@@ -214,7 +214,7 @@
     };
   }
   // sessionStorage 是个二货 -_-|| , 只能存储进 cookies
-  sessionStorage.getItem = c_read;
+  // sessionStorage.getItem = c_read;
   /**
    * @name remove
    * @desc 删除该字段。
@@ -223,6 +223,7 @@
    * @param { name } 字段的名字
    **/
   remove = function(name) {
+    c_remove(name);
     localStorage.removeItem(name);
     sessionStorage.removeItem(name);
     browserStorage.fireEvent();
@@ -254,25 +255,21 @@
      * @param { string } url 默认当前url
      * @param { Storage } storage 一般为 localStorage 这个域，没啥用的参数
      **/
-    fireEvent = (function() {
-      var shouldFire;
-      shouldFire = function(name, oldValue, newValue, url, storage) {
-        var storageEvent;
-        // extend , 判断是否和 undefined 相等，不适用 || 主要是因为可能为 int 0 的情况。
-        name = name === undefined ? "" : name;
-        oldValue = oldValue === undefined ? "" : oldValue;
-        newValue = newValue === undefined ? "" : newValue;
-        url = url === undefined ? "" : location.href;
-        storage = storage === undefined ? {} : storage;
+    fireEvent = function(name, oldValue, newValue, url, storage) {
+      var storageEvent;
+      // extend , 判断是否和 undefined 相等，不适用 || 主要是因为可能为 int 0 的情况。
+      name = name === undefined ? "" : name;
+      oldValue = oldValue === undefined ? "" : oldValue;
+      newValue = newValue === undefined ? "" : newValue;
+      url = url === undefined ? "" : location.href;
+      storage = storage === undefined ? {} : storage;
 
-        // trigger the event
-        storageEvent = document.createEvent("StorageEvent");
-        storageEvent.initStorageEvent('storage-passive', false, false, name, oldValue, newValue, url, storage);
-        (typeof window.dispatchEvent !== "undefined") && (window.dispatchEvent(storageEvent));
-      }
+      // trigger the event
+      storageEvent = document.createEvent("StorageEvent");
+      storageEvent.initStorageEvent('storage-passive', false, false, name, oldValue, newValue, url, storage);
+      (typeof window.dispatchEvent !== "undefined") && (window.dispatchEvent(storageEvent));
+    }
 
-      return shouldFire;
-    })();
     browserStorage.fireEvent = fireEvent;
 
     !(function() {
