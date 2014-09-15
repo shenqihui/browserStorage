@@ -31,7 +31,6 @@ window.browserStorageForceUseCookie = false;
 window.browserStorage = {
   date: new Date(),
   read: function() { "....." },
-  fireEvent: function() { "....." },
   remove: function() { "....." },
   storage: function() { "....." },
   storageSecond: function() { "....." }
@@ -58,19 +57,14 @@ window.browserStorageForceUseCookie = true
 这个是用于比较数据的存储时间信息的，在页面加载的时候进行初始化，记录的是页面初始化时候的时间。  
 默认不会变，毕竟真个页面来说，不需要精细到每时每刻都重新获取时间，要是场景需要，直接覆盖赋值即可。
 
-## browserStorage.read
+## browserStorage.read(name)
 
 从存储的信息中读取数据。  
 要是在 sessionStroage 和 localStorage 都进行存储了，那么将直接返回 sessionStroage 中、删除 localStorage 中的，这么说，就是读取时候， sessionStroage 的优先级将高于 localStorage 。
 
-## browserStorage.fireEvent
 
-自动挂载为 空函数 或者 触发事件的函数。  
-由于 chrome\firefox 等等浏览器，在本页面更新 storage 数据的时候，不触发本页面 window 的 storage 事件。 IE 系列则进行触发。  
-因此程序将做了判断，在不触发本页面 storage 事件的浏览器时，将触发一个自制的事件（window 的 storage-passive 事件，监控的时候可以写上这个，但是 event 参数没那么正规而已），提醒用户 storage 进行修改了。  
-在 IE 等能触发本页面 storage 事件的浏览器，将挂载为 空函数。要是觉得没必要，直接删除掉源码里面关于 browserStorage.fireEvent 的所有行即可。
 
-## browserStorage.remove
+## browserStorage.remove(name)
 
 强力移除 storage 的函数，不管是通过什么方式存储进去的。  
 
@@ -140,7 +134,7 @@ Released under the [WTFPL][1] Licenses
 是驴子是马，溜溜就知道。
 
 ==========
-© shenqihui
+
 
 
 
