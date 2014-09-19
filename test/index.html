@@ -2,6 +2,11 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge">
+  <meta name="x-renderer" content="webkit">
+  <meta name="renderer" content="webkit|ie-comp|ie-stand">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+
   <title>Test</title>
   <style>
     .tip{
@@ -119,6 +124,7 @@
       // console.log('$button2 click');
       var name = $name.value;
       console.log("读取", name, "为：", browserStorage.read(name));
+      alert("读取"+ name+ "为："+browserStorage.read(name));
     });
     
 
